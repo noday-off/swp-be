@@ -2,11 +2,12 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SWP391_PreCookingPackage.Models;
 using SWP391_PreCookingPackage.MappingProfile;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -16,6 +17,17 @@ builder.Services.AddSingleton(new MapperConfiguration(mc =>
     mc.AddProfile(new MappingProfiles());
 }).CreateMapper());
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration.GetSection("AppSettings:Token").Value!))
+    };
+});
 
 //Database configuration
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 32));
