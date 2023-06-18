@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace SWP391_PreCookingPackage.Models;
 
-public partial class RecipesCategory
+public partial class RecipesIngredient
 {
     public int Id { get; set; }
 
+    public int IngredientId { get; set; }
+
     public int RecipeId { get; set; }
 
-    public int CategoryId { get; set; }
-
-    public virtual Category Category { get; set; } = null!;
+    public virtual Ingredient Ingredient { get; set; } = null!;
 
     public virtual Recipe Recipe { get; set; } = null!;
 }

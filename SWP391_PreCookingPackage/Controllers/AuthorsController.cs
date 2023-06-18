@@ -41,10 +41,10 @@ namespace SWP391_PreCookingPackage.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<AuthorModel>> GetAuthor(int id)
         {
-          if (_context.Authors == null)
-          {
-              return NotFound();
-          }
+            if (_context.Authors == null)
+            {
+                return NotFound();
+            }
             var author = await _context.Authors.FindAsync(id);
             AuthorModel result = _mapper.Map<AuthorModel>(author);
             if (result == null)
@@ -89,12 +89,12 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Author>> PostAuthor([FromBody]AuthorModel author)
+        public async Task<ActionResult<Author>> PostAuthor([FromBody] AuthorModel author)
         {
-          if (_context.Authors == null)
-          {
-              return Problem("Entity set 'PrecookContext.Authors'  is null.");
-          }
+            if (_context.Authors == null)
+            {
+                return Problem("Entity set 'PrecookContext.Authors'  is null.");
+            }
             Author new_author = _mapper.Map<AuthorModel, Author>(author);
             //Author new_author = new Author()
             //{

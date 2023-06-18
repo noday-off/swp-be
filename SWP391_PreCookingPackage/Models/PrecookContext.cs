@@ -21,6 +21,8 @@ public partial class PrecookContext : DbContext
 
     public virtual DbSet<Delivery> Deliveries { get; set; }
 
+    public virtual DbSet<Ingredient> Ingredients { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
@@ -29,7 +31,7 @@ public partial class PrecookContext : DbContext
 
     public virtual DbSet<Recipe> Recipes { get; set; }
 
-    public virtual DbSet<RecipesCategory> RecipesCategories { get; set; }
+    public virtual DbSet<RecipesIngredient> RecipesIngredients { get; set; }
 
     public virtual DbSet<Review> Reviews { get; set; }
 
@@ -71,10 +73,18 @@ public partial class PrecookContext : DbContext
 
             entity.ToTable("categories");
 
+            entity.HasIndex(e => e.RecipeId, "recipe_id");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+            entity.Property(e => e.RecipeId).HasColumnName("recipe_id");
+
+            entity.HasOne(d => d.Recipe).WithMany(p => p.Categories)
+                .HasForeignKey(d => d.RecipeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("categories_ibfk_1");
         });
 
         modelBuilder.Entity<Delivery>(entity =>
@@ -101,6 +111,20 @@ public partial class PrecookContext : DbContext
                 .HasForeignKey<Delivery>(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("deliveries_ibfk_1");
+        });
+
+        modelBuilder.Entity<Ingredient>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("ingredients");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -238,29 +262,31 @@ public partial class PrecookContext : DbContext
                 .HasConstraintName("recipes_ibfk_1");
         });
 
-        modelBuilder.Entity<RecipesCategory>(entity =>
+        modelBuilder.Entity<RecipesIngredient>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("recipes_categories");
+            entity.ToTable("recipes_ingredients");
 
-            entity.HasIndex(e => e.CategoryId, "category_id");
+            entity.HasIndex(e => e.IngredientId, "ingredient_id");
 
             entity.HasIndex(e => e.RecipeId, "recipe_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.IngredientId).HasColumnName("ingredient_id");
             entity.Property(e => e.RecipeId).HasColumnName("recipe_id");
 
-            entity.HasOne(d => d.Category).WithMany(p => p.RecipesCategories)
-                .HasForeignKey(d => d.CategoryId)
+            entity.HasOne(d => d.Ingredient).WithMany(p => p.RecipesIngredients)
+                .HasForeignKey(d => d.IngredientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("recipes_categories_ibfk_2");
+                .HasConstraintName("recipes_ingredients_ibfk_1");
 
-            entity.HasOne(d => d.Recipe).WithMany(p => p.RecipesCategories)
+            entity.HasOne(d => d.Recipe).WithMany(p => p.RecipesIngredients)
                 .HasForeignKey(d => d.RecipeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("recipes_categories_ibfk_1");
+                .HasConstraintName("recipes_ingredients_ibfk_2");
         });
 
         modelBuilder.Entity<Review>(entity =>

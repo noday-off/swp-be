@@ -48,8 +48,9 @@ namespace SWP391_PreCookingPackage.Controllers
         {
             List<Claim> claims = new List<Claim> {
                 new Claim(ClaimTypes.Name, user.Username),
-                //new Claim(ClaimTypes.Role, "Admin"),
-                //new Claim(ClaimTypes.Role, "User"),
+                new Claim(ClaimTypes.Role, ((Role)user.Role).ToString()),
+                new Claim(JwtRegisteredClaimNames.Aud, _configuration["AppSettings:Audience"]),
+                new Claim(JwtRegisteredClaimNames.Iss, _configuration["AppSettings:Issuer"])
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
@@ -57,15 +58,28 @@ namespace SWP391_PreCookingPackage.Controllers
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.Now.AddDays(1),
-                    signingCredentials: creds
-                );
+            var token = new SecurityTokenDescriptor
+            {
+                Issuer = _configuration["AppSettings:Audience"],
+                Audience = _configuration["AppSettings:Issuer"],
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = creds
+            };
 
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            var new_token = new JwtSecurityToken
+            (
+                issuer: _configuration["Appsettings:Issuer"],
+                audience: _configuration["AppSettings:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds
+            );
 
-            return jwt;
+            var jwt = new JwtSecurityTokenHandler().CreateToken(token);
+            var encrypterJwt = new JwtSecurityTokenHandler().WriteToken(new_token);
+
+            return encrypterJwt;
         }
     }
 }
