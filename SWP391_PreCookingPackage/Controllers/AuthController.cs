@@ -13,7 +13,6 @@ namespace SWP391_PreCookingPackage.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
