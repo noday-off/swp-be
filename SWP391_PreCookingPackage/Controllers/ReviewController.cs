@@ -65,6 +65,28 @@ namespace SWP391_PreCookingPackage.Controllers
 
             return result;
         }
+        // POST: api/Authors
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Review>> PostReview([FromBody] Review review)
+        {
+            if (_context.Reviews == null)
+            {
+                return Problem("Entity set 'PrecookContext.Reviews'  is null.");
+            }
+            Review new_review = _mapper.Map<Review>(review);
+            //Author new_author = new Author()
+            //{
+            //    Id = author.Id,
+            //    Fullname = author.Fullname,
+            //    Email = author.Email,
+            //    Contact = author.Contact,
+            //    Recipes = null
+            //};
+            _context.Reviews.Add(new_review);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction("GetReview", new { id = review.Id }, review);
+        }
 
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
