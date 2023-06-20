@@ -30,13 +30,20 @@ namespace SWP391_PreCookingPackage.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorModel>>> GetAuthors()
         {
-            if (_context.Authors == null)
+            try
+            {
+                if (_context.Authors == null)
+                {
+                    return NotFound();
+                }
+                var authors = _context.Authors.ToList();
+                IEnumerable<AuthorModel> result = _mapper.Map<IEnumerable<AuthorModel>>(authors);
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
                 return NotFound();
             }
-            var authors = _context.Authors.ToList();
-            IEnumerable<AuthorModel> result = _mapper.Map<IEnumerable<AuthorModel>>(authors);
-            return Ok(result);
         }
 
         // GET: api/Authors/5
