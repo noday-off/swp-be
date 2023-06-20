@@ -11,6 +11,9 @@ namespace SWP391_PreCookingPackage.MappingProfile
             //Author
             CreateMap<AuthorModel, Author>();
             CreateMap<Author, AuthorModel>();
+            //Review
+            CreateMap<Review, ReviewModel>();
+            CreateMap<ReviewModel, Review>();
         }
     }
 }

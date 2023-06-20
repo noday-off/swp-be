@@ -31,7 +31,7 @@ namespace SWP391_PreCookingPackage.Controllers
         }
         // GET: api/REview
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReview()
+        public async Task<ActionResult<IEnumerable<ReviewModel>>> GetReview()
         {
             try
             {
@@ -50,14 +50,14 @@ namespace SWP391_PreCookingPackage.Controllers
         }
         // GET: api/Review/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<AuthorModel>> GetReview(int id)
+        public async Task<ActionResult<ReviewModel>> GetReview(int id)
         {
             if (_context.Reviews == null)
             {
                 return NotFound();
             }
             var reviews = await _context.Reviews.FindAsync(id);
-            AuthorModel result = _mapper.Map<AuthorModel>(reviews);
+            ReviewModel result = _mapper.Map<ReviewModel>(reviews);
             if (result == null)
             {
                 return NotFound();
@@ -68,13 +68,21 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Review>> PostReview([FromBody] Review review)
+        public async Task<ActionResult<Review>> PostReview([FromBody]ReviewModel review)
         {
             if (_context.Reviews == null)
             {
                 return Problem("Entity set 'PrecookContext.Reviews'  is null.");
             }
-            Review new_review = _mapper.Map<Review>(review);
+            //Review new_review = _mapper.Map<ReviewModel,Review>(review);
+
+            Review new_review = new Review()
+            {
+                Id = review.Id,
+                Title = review.Title,
+                Detail = review.Detail,
+
+            };
             //Author new_author = new Author()
             //{
             //    Id = author.Id,
