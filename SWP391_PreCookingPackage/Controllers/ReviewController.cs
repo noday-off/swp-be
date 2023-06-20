@@ -39,7 +39,7 @@ namespace SWP391_PreCookingPackage.Controllers
                 {
                     return NotFound();
                 }
-                var reviews = _context.Reviews.ToList();
+                var reviews = _context.Reviews.ToList();    
                 IEnumerable<Review> result = _mapper.Map<IEnumerable<Review>>(reviews);
                 return Ok(result);
             }
@@ -47,6 +47,58 @@ namespace SWP391_PreCookingPackage.Controllers
             {
                 return NotFound();
             }
+        }
+        // GET: api/Review/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AuthorModel>> GetReview(int id)
+        {
+            if (_context.Reviews == null)
+            {
+                return NotFound();
+            }
+            var reviews = await _context.Reviews.FindAsync(id);
+            AuthorModel result = _mapper.Map<AuthorModel>(reviews);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return result;
+        }
+
+        // PUT: api/Authors/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutReview(int id, Review review)
+        {
+            if (id != review.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(review).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ReviewExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+        private bool ReviewExists(int id)
+        {
+            return (_context.Reviews?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
