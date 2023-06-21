@@ -83,13 +83,8 @@ namespace SWP391_PreCookingPackage.Controllers
                 Detail = review.Detail,
 
             };
-            //Author new_author = new Author()
-            //{
-            //    Id = author.Id,
-            //    Fullname = author.Fullname,
-            //    Email = author.Email,
-            //    Contact = author.Contact,
-            //    Recipes = null
+            //add new review by post
+            // ID, TITLE, DETAIL
             //};
             _context.Reviews.Add(new_review);
             await _context.SaveChangesAsync();
