@@ -7,8 +7,6 @@ public partial class Package
 {
     public int Id { get; set; }
 
-    public int SupplierId { get; set; }
-
     public int RecipeId { get; set; }
 
     public string? Title { get; set; }
@@ -26,6 +24,4 @@ public partial class Package
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual Recipe Recipe { get; set; } = null!;
-
-    public virtual Supplier Supplier { get; set; } = null!;
 }
