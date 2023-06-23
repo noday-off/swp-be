@@ -26,8 +26,31 @@ namespace SWP391_PreCookingPackage.Controllers
             _configuration = configuration;
         }
 
+        [HttpPost("register")]
+        public async Task<ActionResult<UserModel>> Register(UserRegisterModel model)
+        {
+            try
+            {
+                var users = _context.Users;
+                if(users.Any(x => x.Username == model.Username))
+                {
+                    return BadRequest("Username has already been registered.");
+                }
+                User new_user = _mapper.Map<UserRegisterModel, User>(model);
+                users.Add(new_user);
+                await _context.SaveChangesAsync();
+                new_user = users.OrderByDescending(x => x.Id).FirstOrDefault();
+                UserModel result = _mapper.Map<User, UserModel>(new_user);
+                return Ok(result);
+            }catch(Exception ex)
+            {
+                Console.Write(ex.ToString());
+                return BadRequest("Fail to register");
+            }
+        }
+
         [HttpPost("login")]
-        public ActionResult<User> Login(UserLoginModel model)
+        public ActionResult<String> Login(UserLoginModel model)
         {
             var users = _context.Users.ToList();
             if (!users.Any(x => x.Username == model.Username))

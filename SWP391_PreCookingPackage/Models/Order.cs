@@ -15,7 +15,9 @@ public partial class Order
 
     public string? Status { get; set; }
 
-    public virtual Delivery? Delivery { get; set; }
+    public DateTime? ShipDate { get; set; }
+
+    public string? PaymentMethod { get; set; }
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 

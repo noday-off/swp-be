@@ -19,8 +19,6 @@ public partial class PrecookContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<Delivery> Deliveries { get; set; }
-
     public virtual DbSet<Ingredient> Ingredients { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -34,8 +32,6 @@ public partial class PrecookContext : DbContext
     public virtual DbSet<RecipesIngredient> RecipesIngredients { get; set; }
 
     public virtual DbSet<Review> Reviews { get; set; }
-
-    public virtual DbSet<Supplier> Suppliers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -87,32 +83,6 @@ public partial class PrecookContext : DbContext
                 .HasConstraintName("categories_ibfk_1");
         });
 
-        modelBuilder.Entity<Delivery>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.ToTable("deliveries");
-
-            entity.HasIndex(e => e.OrderId, "order_id").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.OrderId).HasColumnName("order_id");
-            entity.Property(e => e.PaymentMethod)
-                .HasMaxLength(255)
-                .HasColumnName("payment_method");
-            entity.Property(e => e.ShipDate)
-                .HasColumnType("datetime")
-                .HasColumnName("ship_date");
-            entity.Property(e => e.ShippperName)
-                .HasMaxLength(255)
-                .HasColumnName("shippper_name");
-
-            entity.HasOne(d => d.Order).WithOne(p => p.Delivery)
-                .HasForeignKey<Delivery>(d => d.OrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("deliveries_ibfk_1");
-        });
-
         modelBuilder.Entity<Ingredient>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
@@ -139,6 +109,12 @@ public partial class PrecookContext : DbContext
             entity.Property(e => e.OrderDate)
                 .HasColumnType("datetime")
                 .HasColumnName("order_date");
+            entity.Property(e => e.PaymentMethod)
+                .HasMaxLength(255)
+                .HasColumnName("payment_method");
+            entity.Property(e => e.ShipDate)
+                .HasColumnType("datetime")
+                .HasColumnName("ship_date");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasColumnName("status");
@@ -194,8 +170,6 @@ public partial class PrecookContext : DbContext
 
             entity.HasIndex(e => e.RecipeId, "recipe_id");
 
-            entity.HasIndex(e => e.SupplierId, "supplier_id");
-
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Detail)
                 .HasMaxLength(255)
@@ -214,7 +188,6 @@ public partial class PrecookContext : DbContext
             entity.Property(e => e.Sales)
                 .HasDefaultValueSql("'0'")
                 .HasColumnName("sales");
-            entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.Title)
                 .HasMaxLength(255)
                 .HasColumnName("title");
@@ -223,11 +196,6 @@ public partial class PrecookContext : DbContext
                 .HasForeignKey(d => d.RecipeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("packages_ibfk_2");
-
-            entity.HasOne(d => d.Supplier).WithMany(p => p.Packages)
-                .HasForeignKey(d => d.SupplierId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("packages_ibfk_1");
         });
 
         modelBuilder.Entity<Recipe>(entity =>
@@ -318,21 +286,6 @@ public partial class PrecookContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("reviews_ibfk_1");
-        });
-
-        modelBuilder.Entity<Supplier>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.ToTable("suppliers");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ContactInfo)
-                .HasMaxLength(255)
-                .HasColumnName("contact_info");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .HasColumnName("name");
         });
 
         modelBuilder.Entity<User>(entity =>

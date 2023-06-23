@@ -1,11 +1,12 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using SWP391_PreCookingPackage.Models;
+//using SWP391_PreCookingPackage.Models;
 using SWP391_PreCookingPackage.MappingProfile;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using SWP391_PreCookingPackage.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,12 +86,6 @@ builder.Services.AddDbContext<PrecookContext>(
 );
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();

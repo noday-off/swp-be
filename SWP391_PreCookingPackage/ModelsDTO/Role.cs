@@ -1,4 +1,4 @@
-﻿namespace SWP391_PreCookingPackage.Models
+﻿namespace SWP391_PreCookingPackage.ModelsDTO
 {
     public enum Role
     {

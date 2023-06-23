@@ -104,18 +104,12 @@ namespace SWP391_PreCookingPackage.Controllers
             {
                 return Problem("Entity set 'PrecookContext.Authors'  is null.");
             }
+            author.Id = 0;
             Author new_author = _mapper.Map<AuthorModel, Author>(author);
-            //Author new_author = new Author()
-            //{
-            //    Id = author.Id,
-            //    Fullname = author.Fullname,
-            //    Email = author.Email,
-            //    Contact = author.Contact,
-            //    Recipes = null
-            //};
             _context.Authors.Add(new_author);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetAuthor", new { id = author.Id }, author);
+            Author result = _context.Authors.OrderByDescending(x => x.Id).FirstOrDefault();
+            return CreatedAtAction("GetAuthor", new { id = result.Id }, result);
         }
 
         // DELETE: api/Authors/5

@@ -8,6 +8,10 @@ namespace SWP391_PreCookingPackage.MappingProfile
     {
         public MappingProfiles()
         {
+            //User
+            CreateMap<UserRegisterModel, User>();
+            CreateMap<UserModel, User>();
+            CreateMap<User, UserModel>();
             //Author
             CreateMap<AuthorModel, Author>();
             CreateMap<Author, AuthorModel>();
