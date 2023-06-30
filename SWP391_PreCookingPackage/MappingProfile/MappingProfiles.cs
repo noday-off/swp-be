@@ -18,6 +18,11 @@ namespace SWP391_PreCookingPackage.MappingProfile
             //Review
             CreateMap<Review, ReviewModel>();
             CreateMap<ReviewModel, Review>();
+
+            //Ingredient
+            CreateMap<Ingredient, IngredientModel>();
+            CreateMap<IngredientModel, Ingredient>();
+
         }
     }
 }

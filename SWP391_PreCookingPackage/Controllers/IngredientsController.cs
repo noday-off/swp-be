@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SWP391_PreCookingPackage.Models;
+using SWP391_PreCookingPackage.ModelsDTO;
 
 namespace SWP391_PreCookingPackage.Controllers
 {
@@ -14,21 +16,33 @@ namespace SWP391_PreCookingPackage.Controllers
     public class IngredientsController : ControllerBase
     {
         private readonly PrecookContext _context;
+        private readonly IMapper _mapper;
 
-        public IngredientsController(PrecookContext context)
+        public IngredientsController(PrecookContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Ingredients
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ingredient>>> GetIngredients()
+        public async Task<ActionResult<IEnumerable<IngredientModel>>> GetIngredients()
         {
-          if (_context.Ingredients == null)
-          {
-              return NotFound();
-          }
-            return await _context.Ingredients.ToListAsync();
+
+            try
+            {
+                if (_context.Ingredients == null)
+                {
+                    return NotFound();
+                }
+                var ingredient = _context.Ingredients.ToList();
+                IEnumerable<IngredientModel> result = _mapper.Map<IEnumerable<IngredientModel>>(ingredient);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
         }
 
         // GET: api/Ingredients/5
@@ -83,30 +97,18 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Ingredients
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Ingredient>> PostIngredient(Ingredient ingredient)
+        public async Task<ActionResult<Ingredient>> PostIngredient([FromBody] IngredientModel ingredient)
         {
           if (_context.Ingredients == null)
           {
               return Problem("Entity set 'PrecookContext.Ingredients'  is null.");
           }
-            _context.Ingredients.Add(ingredient);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (IngredientExists(ingredient.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetIngredient", new { id = ingredient.Id }, ingredient);
+            ingredient.Id = 0;
+            Ingredient new_ingre = _mapper.Map<IngredientModel, Ingredient>(ingredient);
+            _context.Ingredients.Add(new_ingre);
+            await _context.SaveChangesAsync();
+            Ingredient result = _context.Ingredients.OrderByDescending(x => x.Id).FirstOrDefault();
+            return result;
         }
 
         // DELETE: api/Ingredients/5

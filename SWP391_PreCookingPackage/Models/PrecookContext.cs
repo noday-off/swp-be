@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using SWP391_PreCookingPackage.ModelsDTO;
 
 namespace SWP391_PreCookingPackage.Models;
 
@@ -320,4 +321,6 @@ public partial class PrecookContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    public DbSet<SWP391_PreCookingPackage.ModelsDTO.IngredientModel>? IngredientModel { get; set; }
 }
