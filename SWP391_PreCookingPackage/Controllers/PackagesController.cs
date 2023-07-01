@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SWP391_PreCookingPackage.Models;
+using SWP391_PreCookingPackage.ModelsDTO;
 
 namespace SWP391_PreCookingPackage.Controllers
 {
@@ -14,10 +16,12 @@ namespace SWP391_PreCookingPackage.Controllers
     public class PackagesController : ControllerBase
     {
         private readonly PrecookContext _context;
+        private readonly IMapper _mapper;
 
-        public PackagesController(PrecookContext context)
+        public PackagesController(PrecookContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Packages
@@ -52,12 +56,17 @@ namespace SWP391_PreCookingPackage.Controllers
         // PUT: api/Packages/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPackage(int id, Package package)
+        public async Task<IActionResult> PutPackage(int id, PackageModel model)
         {
-            if (id != package.Id)
+            if (id != model.Id)
             {
                 return BadRequest();
             }
+            if (_context.Recipes == null)
+            {
+                return NotFound("Packages is empty");
+            }
+            Package package = _mapper.Map<Package>(model);
 
             _context.Entry(package).State = EntityState.Modified;
 
@@ -83,15 +92,16 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Packages
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Package>> PostPackage(Package package)
+        public async Task<ActionResult<Package>> PostPackage(PackageModel model)
         {
           if (_context.Packages == null)
           {
               return Problem("Entity set 'PrecookContext.Packages'  is null.");
           }
+            model.Id = null;
+            Package package = _mapper.Map<Package>(model);
             _context.Packages.Add(package);
             await _context.SaveChangesAsync();
-
             return CreatedAtAction("GetPackage", new { id = package.Id }, package);
         }
 

@@ -14,7 +14,7 @@ namespace SWP391_PreCookingPackage.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class AuthorsController : ControllerBase
     {
         private readonly PrecookContext _context;
@@ -38,7 +38,7 @@ namespace SWP391_PreCookingPackage.Controllers
                 }
                 var authors = _context.Authors.ToList();
                 IEnumerable<AuthorModel> result = _mapper.Map<IEnumerable<AuthorModel>>(authors);
-                return Ok(result);
+                return Ok(authors);
             }
             catch (Exception ex)
             {
@@ -67,15 +67,18 @@ namespace SWP391_PreCookingPackage.Controllers
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuthor(int id, Author author)
+        public async Task<IActionResult> PutAuthor(int id, AuthorModel model)
         {
-            if (id != author.Id)
+            if (id != model.Id)
             {
                 return BadRequest();
             }
-
+            if(_context.Authors == null)
+            {
+                return NotFound("Authors is null");
+            }
+             Author author = _mapper.Map<Author>(model);            
             _context.Entry(author).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -98,13 +101,14 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Author>> PostAuthor([FromBody] AuthorModel author)
         {
             if (_context.Authors == null)
             {
                 return Problem("Entity set 'PrecookContext.Authors'  is null.");
             }
-            author.Id = 0;
+            author.Id = null;
             Author new_author = _mapper.Map<AuthorModel, Author>(author);
             _context.Authors.Add(new_author);
             await _context.SaveChangesAsync();

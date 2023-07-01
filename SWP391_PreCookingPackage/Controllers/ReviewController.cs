@@ -63,35 +63,29 @@ namespace SWP391_PreCookingPackage.Controllers
                 return NotFound();
             }
 
-            return result;
+            return Ok(result);
         }
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Review>> PostReview([FromBody]ReviewModel review)
+        public async Task<ActionResult<Review>> PostReview([FromBody]ReviewModel model)
         {
             if (_context.Reviews == null)
             {
                 return Problem("Entity set 'PrecookContext.Reviews'  is null.");
             }
-            //Review new_review = _mapper.Map<ReviewModel,Review>(review);
-
-            Review new_review = new Review()
+            if(!_context.Users.Any(u => u.Id == model.UserId))
             {
-                Id = review.Id,
-                Title = review.Title,
-                Detail = review.Detail,
+                return BadRequest("User not found");
+            }
+            if(!_context.Recipes.Any(u => u.Id == model.RecipeId))
+            {
+                return BadRequest("Recipe not found");
+            }
+            model.Id = null;
+            Review review = _mapper.Map<Review>(model);
 
-            };
-            //Author new_author = new Author()
-            //{
-            //    Id = author.Id,
-            //    Fullname = author.Fullname,
-            //    Email = author.Email,
-            //    Contact = author.Contact,
-            //    Recipes = null
-            //};
-            _context.Reviews.Add(new_review);
+            _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetReview", new { id = review.Id }, review);
         }
@@ -99,13 +93,25 @@ namespace SWP391_PreCookingPackage.Controllers
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReview(int id, Review review)
+        public async Task<IActionResult> PutReview(int id, ReviewModel model)
         {
-            if (id != review.Id)
+            if (id != model.Id)
             {
                 return BadRequest();
             }
-
+            if (_context.Reviews == null)
+            {
+                return Problem("Entity set 'PrecookContext.Reviews'  is null.");
+            }
+            if (!_context.Users.Any(u => u.Id == model.UserId))
+            {
+                return BadRequest("User not found");
+            }
+            if (!_context.Recipes.Any(u => u.Id == model.RecipeId))
+            {
+                return BadRequest("Recipe not found");
+            }
+            Review review = _mapper.Map<Review>(model);
             _context.Entry(review).State = EntityState.Modified;
 
             try

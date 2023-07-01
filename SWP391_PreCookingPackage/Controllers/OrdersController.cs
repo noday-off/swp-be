@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SWP391_PreCookingPackage.Models;
+using SWP391_PreCookingPackage.ModelsDTO;
 
 namespace SWP391_PreCookingPackage.Controllers
 {
@@ -14,10 +16,12 @@ namespace SWP391_PreCookingPackage.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly PrecookContext _context;
+        private readonly IMapper _mapper;
 
-        public OrdersController(PrecookContext context)
+        public OrdersController(PrecookContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Orders
@@ -47,6 +51,22 @@ namespace SWP391_PreCookingPackage.Controllers
             }
 
             return order;
+        }
+        [HttpGet("GetByUser/{id}")]
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrderByUser(int id)
+        {
+            if (_context.Orders == null)
+            {
+                return NotFound();
+            }
+            var orders =  _context.Orders.Select(x => x.UserId == id);
+
+            if (orders == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(orders);
         }
 
         // PUT: api/Orders/5
@@ -83,16 +103,17 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(Order order)
+        public async Task<ActionResult<Order>> PostOrder(OrderCreateModel model)
         {
           if (_context.Orders == null)
           {
-              return Problem("Entity set 'PrecookContext.Orders'  is null.");
+              return Problem("Orders Dbset is null.");
           }
+            Order order = _mapper.Map<Order>(model);
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+            return Ok();
+            //return CreatedAtAction("GetOrder", new { id = order.Id }, order);
         }
 
         // DELETE: api/Orders/5

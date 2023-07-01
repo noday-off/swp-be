@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SWP391_PreCookingPackage.Models;
+using SWP391_PreCookingPackage.ModelsDTO;
 
 namespace SWP391_PreCookingPackage.Controllers
 {
@@ -14,26 +16,29 @@ namespace SWP391_PreCookingPackage.Controllers
     public class RecipesIngredientsController : ControllerBase
     {
         private readonly PrecookContext _context;
+        private readonly IMapper _mapper;
 
-        public RecipesIngredientsController(PrecookContext context)
+        public RecipesIngredientsController(PrecookContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/RecipesIngredients
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RecipesIngredient>>> GetRecipesIngredients()
+        public async Task<ActionResult<IEnumerable<RecipesIngredientModel>>> GetRecipesIngredients()
         {
           if (_context.RecipesIngredients == null)
           {
               return NotFound();
           }
-            return await _context.RecipesIngredients.ToListAsync();
+            var result = _mapper.Map<IEnumerable<RecipesIngredient>>(_context.RecipesIngredients);
+            return Ok(result);
         }
 
         // GET: api/RecipesIngredients/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<RecipesIngredient>> GetRecipesIngredient(int id)
+        public async Task<ActionResult<RecipesIngredientModel>> GetRecipesIngredient(int id)
         {
           if (_context.RecipesIngredients == null)
           {
@@ -45,20 +50,20 @@ namespace SWP391_PreCookingPackage.Controllers
             {
                 return NotFound();
             }
-
-            return recipesIngredient;
+            var result = _mapper.Map<RecipesIngredientModel>(recipesIngredient);
+            return Ok(result);
         }
 
         // PUT: api/RecipesIngredients/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRecipesIngredient(int id, RecipesIngredient recipesIngredient)
+        public async Task<IActionResult> PutRecipesIngredient(int id, RecipesIngredientModel model)
         {
-            if (id != recipesIngredient.Id)
+            if (id != model.Id)
             {
                 return BadRequest();
             }
-
+            RecipesIngredient recipesIngredient = _mapper.Map<RecipesIngredient>(model);
             _context.Entry(recipesIngredient).State = EntityState.Modified;
 
             try
@@ -83,12 +88,14 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/RecipesIngredients
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<RecipesIngredient>> PostRecipesIngredient(RecipesIngredient recipesIngredient)
+        public async Task<ActionResult<RecipesIngredient>> PostRecipesIngredient(RecipesIngredientModel model)
         {
           if (_context.RecipesIngredients == null)
           {
               return Problem("Entity set 'PrecookContext.RecipesIngredients'  is null.");
           }
+            model.Id = null;
+            RecipesIngredient recipesIngredient = _mapper.Map<RecipesIngredient>(model);
             _context.RecipesIngredients.Add(recipesIngredient);
             try
             {

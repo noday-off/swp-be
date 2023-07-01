@@ -50,7 +50,7 @@ namespace SWP391_PreCookingPackage.Controllers
         }
 
         [HttpPost("login")]
-        public ActionResult<String> Login(UserLoginModel model)
+        public ActionResult Login(UserLoginModel model)
         {
             var users = _context.Users.ToList();
             if (!users.Any(x => x.Username == model.Username))
@@ -64,8 +64,8 @@ namespace SWP391_PreCookingPackage.Controllers
             }
 
             string token = CreateToken(users.Find(x => x.Username == model.Username && x.Password == model.Password));
-
-            return Ok(token);
+            var data = new { token = token };
+            return Ok(data);
         }
 
         private string CreateToken(User user)

@@ -2,7 +2,7 @@
 {
     public class AuthorModel
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public string Fullname { get; set; } = null!;
 
