@@ -97,6 +97,10 @@ namespace SWP391_PreCookingPackage.Controllers
             {
                 return NotFound("Recipes is null");
             }
+            if(model.AuthorId != null && !_context.Authors.Any(a => a.Id == model.AuthorId))
+            {
+                return BadRequest("Author not found");
+            }
             Recipe recipe = _mapper.Map<Recipe>(model);
             _context.Entry(recipe).State = EntityState.Modified;
 
