@@ -118,6 +118,7 @@ namespace SWP391_PreCookingPackage.Controllers
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
             if (_context.Authors == null)
@@ -127,7 +128,7 @@ namespace SWP391_PreCookingPackage.Controllers
             var author = await _context.Authors.FindAsync(id);
             if (author == null)
             {
-                return NotFound();
+                return BadRequest("Author not found!");
             }
 
             _context.Authors.Remove(author);

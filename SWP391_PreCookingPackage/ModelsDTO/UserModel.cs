@@ -17,6 +17,7 @@
         public string? Address { get; set; }
 
         public int? Role { get; set; }
+        public List<OrderModel> Orders { get; set; } = new List<OrderModel>(); 
     }
 
     public partial class UserRegisterModel

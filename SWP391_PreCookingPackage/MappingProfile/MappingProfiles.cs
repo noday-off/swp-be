@@ -32,6 +32,7 @@ namespace SWP391_PreCookingPackage.MappingProfile
             CreateMap<Category,CategoryModel>();
             CreateMap<CategoryModel,Category>();
             //Order
+            CreateMap<OrderCreateModel,Order>();
             CreateMap<OrderModel,Order>();
             CreateMap<Order,OrderModel>();
             //OrderItem

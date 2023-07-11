@@ -35,15 +35,15 @@
 
     public class OrderItemModel
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public int OrderId { get; set; }
 
         public int PackageId { get; set; }
-        public string PackageTitle { get; set; }
 
         public int? Quantity { get; set; }
 
         public decimal? Price { get; set; }
+        public PackageModel? Package { get; set; }
     }
 }

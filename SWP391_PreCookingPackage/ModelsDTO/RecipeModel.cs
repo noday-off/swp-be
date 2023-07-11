@@ -20,6 +20,7 @@ namespace SWP391_PreCookingPackage.ModelsDTO
         public List<string> Ingredients { get; set; } = new List<string>();
         public List<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
         public List<PackageModel> Packages { get; set; } = new List<PackageModel>();
+        public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
     }
 
     public class RecipeCreateModel

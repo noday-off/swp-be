@@ -44,6 +44,17 @@ namespace SWP391_PreCookingPackage.Controllers
             //    //include packages
             //    item.Packages = _mapper.Map<List<PackageModel>>(_context.Packages.Where(p => p.RecipeId == item.Id));
             //}
+            foreach (var item in result)
+            {
+                //include ingredients
+                item.Ingredients = _context.RecipesIngredients
+                        .Include(ri => ri.Ingredient)
+                        .Where(ri => ri.RecipeId == item.Id)
+                        .Select(ri => ri.Ingredient.Name)
+                        .ToList();
+                //include categories
+                item.Categories = _mapper.Map<List<CategoryModel>>(_context.Categories.Where(c => c.RecipeId == item.Id).ToList());
+            }
             return Ok(result);
         }
 
@@ -68,6 +79,9 @@ namespace SWP391_PreCookingPackage.Controllers
                     .Where(ri => ri.RecipeId == result.Id)
                     .Select(ri => ri.Ingredient.Name)
                     .ToList();
+            //include categories
+            result.Categories = _mapper.Map<List<CategoryModel>>(_context.Categories.Where(c => c.RecipeId == result.Id).ToList());
+            //include packages
             result.Packages = _mapper.Map<List<PackageModel>>(_context.Packages.Where(p => p.RecipeId == result.Id));
             return Ok(result);
         }
@@ -132,12 +146,16 @@ namespace SWP391_PreCookingPackage.Controllers
           {
               return Problem("Entity set 'PrecookContext.Recipes'  is null.");
           }
-          model.Id = null;
-          Recipe recipe = _mapper.Map<Recipe>(model);
+            if (model.AuthorId != null && !_context.Authors.Any(a => a.Id == model.AuthorId))
+            {
+                return BadRequest("Author not found");
+            }
+            model.Id = null;
+            Recipe recipe = _mapper.Map<Recipe>(model);
             _context.Recipes.Add(recipe);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetRecipe", new { id = recipe.Id }, recipe);
+            Recipe result = _context.Recipes.OrderByDescending(x => x.Id).FirstOrDefault();
+            return CreatedAtAction("GetRecipe", new { id = result.Id }, result);
         }
 
         // DELETE: api/Recipes/5
@@ -146,12 +164,12 @@ namespace SWP391_PreCookingPackage.Controllers
         {
             if (_context.Recipes == null)
             {
-                return NotFound();
+                return Problem("The Recipes is null!");
             }
             var recipe = await _context.Recipes.FindAsync(id);
             if (recipe == null)
             {
-                return NotFound();
+                return BadRequest("Recipe not found");
             }
 
             _context.Recipes.Remove(recipe);

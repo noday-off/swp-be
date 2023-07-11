@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SWP391_PreCookingPackage.Models;
+using SWP391_PreCookingPackage.ModelsDTO;
 
 namespace SWP391_PreCookingPackage.Controllers
 {
@@ -14,26 +16,29 @@ namespace SWP391_PreCookingPackage.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly PrecookContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(PrecookContext context)
+        public CategoriesController(PrecookContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryModel>>> GetCategories()
         {
-          if (_context.Categories == null)
-          {
-              return NotFound();
-          }
-            return await _context.Categories.ToListAsync();
+            if (_context.Categories == null)
+            {
+                return NotFound();
+            }
+            var categories = await _context.Categories.ToListAsync();
+            return Ok(_mapper.Map<IEnumerable<CategoryModel>>(categories));
         }
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<ActionResult<CategoryModel>> GetCategory(int id)
         {
           if (_context.Categories == null)
           {
@@ -43,22 +48,26 @@ namespace SWP391_PreCookingPackage.Controllers
 
             if (category == null)
             {
-                return NotFound();
+                return BadRequest("Category not found!");
             }
 
-            return category;
+            return Ok(_mapper.Map<CategoryModel>(category));
         }
 
         // PUT: api/Categories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(int id, CategoryModel model)
         {
-            if (id != category.Id)
+            if (id != model.Id)
             {
-                return BadRequest();
+                return BadRequest("Id doesn't match!");
             }
-
+            if (!_context.Recipes.Any(r => r.Id == model.RecipeId))
+            {
+                return BadRequest("Recipe not found");
+            }
+            Category category = _mapper.Map<Category>(model);
             _context.Entry(category).State = EntityState.Modified;
 
             try
@@ -83,16 +92,22 @@ namespace SWP391_PreCookingPackage.Controllers
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<Category>> PostCategory(CategoryModel model)
         {
-          if (_context.Categories == null)
-          {
-              return Problem("Entity set 'PrecookContext.Categories'  is null.");
-          }
+            if (_context.Categories == null)
+            {
+                return Problem("Entity set 'Categories'  is null.");
+            }
+            if(!_context.Recipes.Any(r => r.Id == model.RecipeId))
+            {
+                return BadRequest("Recipe not found");
+            }
+            model.Id = null;
+            Category category = _mapper.Map<Category>(model);
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            Category result = _context.Categories.OrderByDescending(c => c.Id).FirstOrDefault();
+            return CreatedAtAction("GetCategory", new { id = result.Id }, result);
         }
 
         // DELETE: api/Categories/5

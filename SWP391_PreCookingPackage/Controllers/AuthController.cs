@@ -37,12 +37,25 @@ namespace SWP391_PreCookingPackage.Controllers
                     return BadRequest("Username has already been registered.");
                 }
                 User new_user = _mapper.Map<UserRegisterModel, User>(model);
+                new_user.Role = 1;
                 users.Add(new_user);
                 await _context.SaveChangesAsync();
-                new_user = users.OrderByDescending(x => x.Id).FirstOrDefault();
-                UserModel result = _mapper.Map<User, UserModel>(new_user);
-                return Ok(result);
-            }catch(Exception ex)
+                User result = users.OrderByDescending(x => x.Id).FirstOrDefault();
+                OrderCreateModel default_cart_order = new OrderCreateModel
+                {
+                    UserId = result.Id,
+                    OrderDate = DateTime.Now,
+                    TotalPrice = 0,
+                    Status = "On-cart",
+                    PaymentMethod = "COD",
+                };
+                Order default_order = _mapper.Map<Order>(default_cart_order);
+                _context.Orders.Add(default_order);
+                await _context.SaveChangesAsync();
+                //return CreatedAtRoute("GetUserById", new { controller = "users", id = result.Id }, result);
+                return Ok(_mapper.Map<UserModel>(result));
+            }
+            catch(Exception ex)
             {
                 Console.Write(ex.ToString());
                 return BadRequest("Fail to register");
