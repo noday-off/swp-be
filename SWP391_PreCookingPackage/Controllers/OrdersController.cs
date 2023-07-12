@@ -169,6 +169,67 @@ namespace SWP391_PreCookingPackage.Controllers
             return NoContent();
         }
 
+        [HttpPut("complete/{id}")]
+        public async Task<IActionResult> CompleteOrder(int id)
+        {
+            if (_context.Orders == null)
+            {
+                return Problem("The Orders is null!");
+            }
+            var order = _context.Orders.FirstOrDefault(o => o.Id == id);
+            if(order == null)
+            {
+                return BadRequest("Order not found!");
+            }
+            var items = _context.OrderItems.Where(oi => oi.OrderId == id).ToList();
+            if(items == null || !items.Any())
+            {
+                return BadRequest("Order has no item!");
+            }
+            //update the quantity of packages in db
+            int sale = 0;
+            Package package;
+            foreach(var item in items)
+            {
+                package = _context.Packages.FirstOrDefault(p => p.Id == item.PackageId);
+                if(package == null)
+                {
+                    return BadRequest("Order contains a invalid package!");
+                }
+                sale = item.Quantity ?? 0;
+                if(package.Quantity < sale)
+                {
+                    return BadRequest($"The package {package.Title} has less quantity than the selected quantity.");
+                }
+                if(package.Quantity <= 0)
+                {
+                    return BadRequest($"The package [{package.Title}] has been already sold out.");
+                }
+                package.Sales += sale;
+                package.Quantity -= sale;
+                _context.Entry(package).State = EntityState.Modified;
+            }
+            order.Status = "Completed";
+            _context.Entry(order).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderExists(id))
+                {
+                    return BadRequest("Order not found!");
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]

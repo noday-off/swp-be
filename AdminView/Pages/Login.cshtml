@@ -1,0 +1,55 @@
+﻿@page
+@model AdminView.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+    //string url = apiDomain.url;
+}
+
+<form method="post" class="mt-4" id="form">
+    <div class="mb-3">
+        <label for="username" class="form-label">Username:</label>
+        <input type="text" id="username" name="username" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password:</label>
+        <input type="password" id="password" name="password" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Log In</button>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $('form').submit(function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            var username = $('#username').val();
+            var password = $('#password').val();
+
+            // Send the login request using AJAX
+            $.ajax({
+                url: "@apiDomain.url" + "/auth/login",
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                success: function(response) {
+                    // Handle the successful login response
+                    localStorage.setItem('token', response.token);
+                    window.location.href = '/'; // Redirect to a success page
+                },
+                error: function(xhr, status, error) {
+                    // Handle the login error
+                    var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Invalid username or password.';
+                    $('.error-message').text(errorMessage);
+                    alert(errorMessage);
+                }
+            });
+        });
+    });
+</script>
+
+
