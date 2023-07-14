@@ -57,20 +57,20 @@ namespace SWP391_PreCookingPackage.Controllers
         }
 
         [HttpGet("GetByUser/{id}")]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrderByUser(int id)
+        public async Task<ActionResult<IEnumerable<OrderModel>>> GetOrderByUser(int id)
         {
             if (_context.Orders == null)
             {
                 return NotFound();
             }
-            var orders =  _context.Orders.Select(x => x.UserId == id);
+            var orders =  _context.Orders.Where(x => x.UserId == id);
 
             if (orders == null)
             {
                 return NotFound();
             }
-
-            return Ok(orders);
+            var result = _mapper.Map<IEnumerable<OrderModel>>(orders);
+            return Ok(result);
         }
         [HttpGet("GetCartByUser/{id}")]
         public async Task<ActionResult<Order>> GetCartByUser(int id)
@@ -97,8 +97,8 @@ namespace SWP391_PreCookingPackage.Controllers
                 order = _context.Orders.FirstOrDefault(x => x.UserId == id && x.Status == "On-cart");
             }
             OrderModel result = _mapper.Map<OrderModel>(order);
-            result.Items = _mapper.Map<List<OrderItemModel>>(_context.OrderItems.Where(oi => oi.OrderId == result.Id).ToList());
-            return Ok(order);
+            result.Items = _mapper.Map<List<OrderItemModel>>(_context.OrderItems.Where(oi => oi.OrderId == result.Id).Include(oi => oi.Package).ToList());
+            return Ok(result);
         }
 
         // PUT: api/Orders/5

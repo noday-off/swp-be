@@ -1,0 +1,252 @@
+﻿@page
+@model AdminView.Pages.manage.OrdersModel
+@{
+}
+
+<!-- Authentication check-->
+<script>
+    if(!localStorage.getItem('token')){
+        window.location.href = '/login';
+    }
+</script>
+
+<div class="container">
+    <div class="modal fade overflow-auto" id="updateModal" data-backdrop="false">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal header-->
+              <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <!-- Modal body-->
+              <div class="modal-body">
+                <!-- Class basic information-->
+                <div id="basicInfoSection">
+                  <h4>Basic Information</h4>
+                  <form id="updateForm">
+                    <div class="form-group">
+                      <label for="uOrderId">Id</label>
+                      <input type="text" class="form-control" id="uOrderId" name="id" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="uUserId">User Id</label>
+                      <input type="text" class="form-control" id="uUserId" name="userId" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="uOrderDate">Order Date</label>
+                      <input type="date" class="form-control" id="uOrderDate" name="orderDate" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="uShipDate">Ship Date</label>
+                      <input type="date" class="form-control" id="uShipDate" name="shipDate" >
+                    </div>
+                    <div class="form-group">
+                      <label for="uTotalPrice">Total Price</label>
+                      <input type="number" class="form-control" id="uTotalPrice" name="totalPrice" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="uPaymentMethod">Payment Method</label>
+                      <input type="text" class="form-control" id="uPaymentMethod" name="paymentMethod" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="uStatus">Status</label>
+                        <select id="uStatus" name="status" class="form-control">
+                            <option value="On-cart">On-cart</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select >
+                    </div>
+                    <button type="submit" class="mt-3 btn btn-outline-primary">Update Info</button>
+                  </form>
+                </div>
+                <hr style="border-top: 3px dashed #999999;">
+                <!--Items -->
+                <div id="orderItemsSection">
+                  <h4>Items</h4>
+                  <table id="itemsTable" class="table table-striped table-bordered mt-3">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>Id</th>
+                      <th>Package Id</th>
+                      <th>Package Title</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orderItems"></tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <h1>List of Orders</h1>
+
+    @*<input type="text" id="searchBar" placeholder="Search">*@
+
+    <table id="mainTable" class="table table-striped table-bordered mt-3">
+    <thead class="thead-dark">
+        <tr>
+            <th>Id</th>
+            <th>User Id</th>
+            <th>Order Date</th>
+            <th>Ship Date</th>
+            <th>Total Price (VND)</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+        <tbody id="items">
+            @*<tr>
+            <td>
+                <div class="table-data-feature">
+                    <button class="item edit-order-btn btn btn-outline-secondary" onclick="openUpdateModal(1)" data-order-id="1" data-placement="top" title="Edit"><i class="bi bi-pen-fill"></i></button>
+                </div>
+            </td>
+            </tr>*@
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        //$('#searchBar').on('keyup', function () {
+        //    var searchText = $(this).val();
+
+        //    $.ajax({
+        //        url: '/Entities/Search',
+        //        type: 'GET',
+        //        data: { searchText: searchText },
+        //        success: function (result) {
+        //            $('#entityTable').html(result);
+        //        }
+        //    });
+        //});
+
+        $.ajax({
+            url: '@apiDomain.Url/orders',
+            type: 'GET',
+            success: function (data) {
+                var tableHTML = $('#items').html();;
+                data.forEach(function(item, index) {
+                    //format date
+                    var orderDate = new Date(item.orderDate).toLocaleDateString(undefined,{
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                    });
+                    var shipDate = new Date(item.shipDate).toLocaleDateString(undefined,{
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                    });
+                        
+                    tableHTML += '<tr>';
+                    tableHTML += '<td>' + item.id + '</td>';
+                    tableHTML += '<td>' + item.userId + '</td>';
+                    tableHTML += '<td>' + orderDate + '</td>';
+                    tableHTML += '<td>' + shipDate + '</td>';
+                    tableHTML += '<td>' + item.totalPrice.toLocaleString('en-US', { style: 'decimal' }) + '</td>';
+                    tableHTML += '<td>' + item.paymentMethod + '</td>';
+                    //tableHTML += '<td class="status">' + item.status + '</td>';
+                    switch(item.status){
+                        case 'On-cart': tableHTML += '<td class="text-warning">' + item.status + '</td>'; break;
+                        case 'Pending': tableHTML += '<td class="text-primary">' + item.status + '</td>'; break;
+                        case 'Completed': tableHTML += '<td class="text-success">' + item.status + '</td>'; break;
+                        case 'Cancelled': tableHTML += '<td class="text-danger">' + item.status + '</td>'; break;
+                        default: tableHTML += '<td>' + item.status + '</td>'; break;
+                    };
+                    tableHTML += '<td>' + 
+                        '<div class="table-data-feature"><button onclick="openUpdateModal('+item.id+')" class="item edit-order-btn btn btn-outline-secondary" data-order-id="'+ item.id +'" data-placement="top" title="Edit"><i class="bi bi-pen-fill"></i></button></div>'
+                        + '</td>';
+                    tableHTML += '</tr>';
+                });
+                $('#items').html(tableHTML);
+            },
+            error: function(xhr, status, error) {
+                // Handle the login error
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Invalid username or password.';
+                $('.error-message').text(errorMessage);
+                alert(errorMessage);
+            }
+        });
+
+        $('#updateForm').on('submit', function(event) {
+          event.preventDefault();
+          var formData = $(this).serializeArray();
+          var id = $('input[name="id"]').val();
+          updateBasicInfo(formData,id);
+        }); 
+
+    });
+
+        function openUpdateModal(orderId) {
+            $.ajax({
+                    url: '@apiDomain.Url/orders/'+orderId,
+                    method: 'GET',
+                    dataType: 'json',
+                    //headers: {
+                    //    'Authorization': 'Bearer ' + ''
+                    //},
+                    success: function(data) {
+                        // Populate basic information section
+                        $('#uOrderId').val(data.id);
+                        $('#uUserId').val(data.userId);
+                        $('#uTotalPrice').val(data.totalPrice);
+                        $('#uStatus').val(data.status);
+                        $('#uOrderDate').val(new Date(data.orderDate).toISOString().substring(0, 10));
+                        $('#uShipDate').val(data.shipDate ? new Date(data.shipDate).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10));
+                        $('#uShipDate').prop('min', $('#uOrderDate').val());
+                        $('#uPaymentMethod').val(data.paymentMethod);
+
+                    
+                        //Populate schedule list
+                        var tableHTML = '';
+                        data.items.forEach(function(item, index) {
+                        
+                            tableHTML += '<tr>';
+                            tableHTML += '<td>' + item.id + '</td>';
+                            tableHTML += '<td>' + item.packageId+ '</td>';
+                            tableHTML += '<td>' + item.package.title + '</td>';
+                            tableHTML += '<td>' + item.quantity + '</td>';
+                            tableHTML += '<td>' + item.price + '</td>';
+                            tableHTML += '</tr>';
+                        });
+                        $('#orderItems').html(tableHTML);
+                        $('#updateModal').modal('show');
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log('Error fetching class data:', errorThrown);
+                        alert("Fail to get the order detail.");
+                    }
+            });
+        }
+
+        function updateBasicInfo(formData,id) {
+            var formDataJSON = {};
+            $.each(formData, function() {
+                formDataJSON[this.name] = this.value;
+            });
+            $.ajax({
+              url: '@apiDomain.Url/orders/'+ id,
+              method: 'PUT',
+              data: JSON.stringify(formDataJSON),
+              contentType: 'application/json',
+              success: function(response) {
+                console.log('Order updated successfully');
+                location.reload();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error updating order info:', errorThrown);
+                alert(jqXHR.responseText || 'Fail to update the order!');
+              }
+            });
+          }
+    
+</script>

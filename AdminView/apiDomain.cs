@@ -2,6 +2,6 @@
 {
     public class apiDomain
     {
-        public static readonly string url = "https://cookyzz.azurewebsites.net/api";
+        public static readonly string Url = "https://cookyzz.azurewebsites.net/api";
     }
 }

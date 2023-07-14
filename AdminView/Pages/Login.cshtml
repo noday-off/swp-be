@@ -4,6 +4,10 @@
     ViewData["Title"] = "Login";
     //string url = apiDomain.url;
 }
+<script>
+    //clear the token 
+    localStorage.removeItem('token');
+</script>
 
 <form method="post" class="mt-4" id="form">
     <div class="mb-3">
@@ -29,7 +33,7 @@
 
             // Send the login request using AJAX
             $.ajax({
-                url: "@apiDomain.url" + "/auth/login",
+                url: "@apiDomain.Url" + "/auth/login",
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
