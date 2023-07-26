@@ -36,8 +36,9 @@ namespace SWP391_PreCookingPackage.Controllers
                 {
                     return BadRequest("Username has already been registered.");
                 }
+                model.Role = 1;
                 User new_user = _mapper.Map<UserRegisterModel, User>(model);
-                new_user.Role = 1;
+                //new_user.Role = 1;
                 users.Add(new_user);
                 await _context.SaveChangesAsync();
                 User result = users.OrderByDescending(x => x.Id).FirstOrDefault();
