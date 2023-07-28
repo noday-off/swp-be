@@ -169,6 +169,21 @@ namespace SWP391_PreCookingPackage.Controllers
             model.Id = null;
 
             var order = _context.Orders.Include(o => o.OrderItems).FirstOrDefault(o => o.Id == id);
+            var package = _context.Packages.FirstOrDefault(p => p.Id == model.PackageId);
+            if (package == null)
+            {
+                return BadRequest("Invalid package!");
+            }
+            int sale = model.Quantity ?? 0;
+            if (package.Quantity < sale)
+            {
+                return BadRequest($"The package [{package.Title}] has less quantity than the selected quantity.");
+            }
+            if (package.Quantity <= 0)
+            {
+                return BadRequest($"The package [{package.Title}] has been already sold out.");
+            }
+
             var existingItem = order.OrderItems.FirstOrDefault(oi => oi.PackageId == model.PackageId);
 
             if(existingItem != null)
@@ -340,7 +355,7 @@ namespace SWP391_PreCookingPackage.Controllers
                 {
                     return $"The package [{package.Title}] has been already sold out.";
                 }
-                package.Sales += sale;
+                //package.Sales += sale;
                 package.Quantity -= sale;
                 _context.Entry(package).State = EntityState.Modified;
             }

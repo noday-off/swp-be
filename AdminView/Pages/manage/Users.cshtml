@@ -2,3 +2,290 @@
 @model AdminView.Pages.manage.UsersModel
 @{
 }
+
+<!-- Authentication check-->
+<script>
+    if(!localStorage.getItem('token')){
+        window.location.href = '/login';
+    }
+</script>
+
+<div class="container">
+    <!-- ADD MODAL -->
+        <div class="modal fade overflow-auto" id="addModal" data-backdrop="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Create user</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                <!-- Class basic information-->
+                <div id="basicInfoSection">
+                  <h4>Basic Information</h4>
+                  <form id="addForm">
+                    <div class="form-group">
+                      <label for="Name">Name</label>
+                      <input type="text" class="form-control" id="Name" name="name">
+                    </div>
+                    <div class="form-group">
+                      <label for="uEmail">Email</label>
+                      <input type="email" class="form-control" id="Email" name="email">
+                    </div>
+                    <div class="form-group">
+                      <label for="Contact">Contact</label>
+                      <input type="text" class="form-control" id="Contact" name="contact">
+                    </div>
+
+                    <button type="submit" class="mt-3 btn btn-outline-primary">Add</button>
+                  </form>
+                </div>
+                <hr style="border-top: 3px dashed #999999;">
+              </div>
+            </div>
+        </div>
+        </div>
+
+    <!--Update modal-->
+    <div class="modal fade overflow-auto" id="updateModal" data-backdrop="false">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal header-->
+              <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <!-- Modal body-->
+              <div class="modal-body">
+                <!-- Class basic information-->
+                <div id="basicInfoSection">
+                  <h4>Basic Information</h4>
+                  <form id="updateForm">
+                    <div class="form-group">
+                      <label for="uAuthorId">Id</label>
+                      <input type="text" class="form-control" id="uId" name="id" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="uUsername">Username</label>
+                      <input type="text" class="form-control" id="uUsername" name="username">
+                    </div>
+                    <div class="form-group">
+                      <label for="uPassword">Password</label>
+                      <input type="password" class="form-control" id="uPassword" name="password">
+                    </div>
+                    <div class="form-group">
+                      <label for="uName">Name</label>
+                      <input type="text" class="form-control" id="uName" name="name">
+                    </div>
+                    <div class="form-group">
+                      <label for="uEmail">Email</label>
+                      <input type="email" class="form-control" id="uEmail" name="email">
+                    </div>
+                    <div class="form-group">
+                      <label for="uPhone">Phone</label>
+                      <input type="text" class="form-control" id="uPhone" name="phone">
+                    </div>
+                    <div class="form-group">
+                      <label for="uAddress">Address</label>
+                      <input type="text" class="form-control" id="uAddress" name="address">
+                    </div>
+                    <div class="form-group">
+                      <label for="uRole">Role</label>
+                        <select id="uRole" name="role" class="form-group">
+                            <option value="0">Admin</option>
+                            <option value="1">User</option>
+                        </select >
+                    </div>
+                    <button type="submit" class="mt-3 btn btn-outline-primary">Update Info</button>
+                  </form>
+                </div>
+                <hr style="border-top: 3px dashed #999999;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <h1>List of Users</h1>
+    @*<div class="table-data__tool-right">
+        <button id="addBtn" class="btn btn-primary">
+            <i class="zmdi zmdi-plus"></i>Create
+        </button>
+    </div>*@
+    @*<input type="text" id="searchBar" placeholder="Search">*@
+
+    <table id="mainTable" class="table table-striped table-bordered mt-3">
+    <thead class="thead-dark">
+        <tr>
+            <th>Id</th>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+        <tbody id="items">
+            @*<tr>
+            <td>
+                <div class="table-data-feature">
+                    <button class="item edit-order-btn btn btn-outline-secondary" onclick="openUpdateModal(1)" data-order-id="1" data-placement="top" title="Edit"><i class="bi bi-pen-fill"></i></button>
+                </div>
+            </td>
+            </tr>*@
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        //$('#searchBar').on('keyup', function () {
+        //    var searchText = $(this).val();
+
+        //    $.ajax({
+        //        url: '/Entities/Search',
+        //        type: 'GET',
+        //        data: { searchText: searchText },
+        //        success: function (result) {
+        //            $('#entityTable').html(result);
+        //        }
+        //    });
+        //});
+
+        $.ajax({
+            url: '@apiDomain.Url/users',
+            type: 'GET',
+            headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            success: function (data) {
+                var tableHTML = $('#items').html();;
+                data.forEach(function(item, index) {
+                    const roles = ["Admin","User"];
+                    var role = item.role != null ? roles[item.role] : "Unknown";
+                    // populate data 
+                    tableHTML += '<tr>';
+                    tableHTML += '<td>' + item.id + '</td>';
+                    tableHTML += '<td>' + item.username + '</td>';
+                    tableHTML += '<td>' + item.name+ '</td>';
+                    tableHTML += '<td>' + item.email+ '</td>';
+                    tableHTML += '<td>' + item.phone+ '</td>';
+                    tableHTML += '<td>' + item.address + '</td>';
+                    tableHTML += '<td>' + role + '</td>';
+                    tableHTML += '<td>' + 
+                        '<div class="table-data-feature"><button onclick="openUpdateModal('+item.id+')" class="item edit-order-btn btn btn-outline-secondary" data-order-id="'+ item.id +'" data-placement="top" title="Edit"><i class="bi bi-pen-fill"></i></button></div>'
+                        + '</td>';
+                    tableHTML += '</tr>';
+                });
+                $('#items').html(tableHTML);
+            },
+            error: function(xhr, status, error) {
+                // Handle the login error
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Something went wrong!';
+                $('.error-message').text(errorMessage);
+                alert(errorMessage);
+            }
+        });
+        $('#addBtn').on('click', function(event) {
+          event.preventDefault();
+          $('#addModal').modal('show');
+        });
+
+        $('#addForm').on('submit', function(event) {
+          event.preventDefault();
+          var formData = $(this).serializeArray();
+          add(formData);
+        });
+
+        $('#updateForm').on('submit', function(event) {
+          event.preventDefault();
+          var formData = $(this).serializeArray();
+          var id = $('input[name="id"]').val();
+          updateBasicInfo(formData,id);
+        }); 
+
+    });
+
+        function openUpdateModal(Id) {
+            $.ajax({
+                    url: '@apiDomain.Url/users/'+Id,
+                    method: 'GET',
+                    dataType: 'json',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    success: function(data) {
+                        // Populate basic information section
+                        $('#uId').val(data.id);
+                        $('#uUsername').val(data.username);
+                        $('#uPassword').val(data.password);
+                        $('#uName').val(data.name);
+                        $('#uPhone').val(data.phone);
+                        $('#uEmail').val(data.email);
+                        $('#uAddress').val(data.address);
+                        $('#uRole').val(data.role);                    
+                        
+                        $('#updateModal').modal('show');
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log('Error fetching class data:', errorThrown);
+                        alert("Fail to get the detail.");
+                    }
+            });
+        }
+
+        function add(formData) {
+            var formDataJSON = {};
+            $.each(formData, function() {
+                formDataJSON[this.name] = this.value;
+            });
+            $.ajax({
+              url: '@apiDomain.Url/users',
+              method: 'POST',
+              headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+              },
+              data: JSON.stringify(formDataJSON),
+              contentType: 'application/json',
+              success: function(response) {
+                console.log('Added successfully');
+                location.reload();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error updating info:', errorThrown);
+                alert(jqXHR.responseText || 'Fail to add!');
+              }
+            });
+          }
+
+        function updateBasicInfo(formData,id) {
+            var formDataJSON = {};
+            $.each(formData, function() {
+                formDataJSON[this.name] = this.value;
+            });
+            $.ajax({
+              url: '@apiDomain.Url/users/'+ id,
+              method: 'PUT',
+              headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+              },
+              data: JSON.stringify(formDataJSON),
+              contentType: 'application/json',
+              success: function(response) {
+                console.log('Updated successfully');
+                location.reload();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error updating info:', errorThrown);
+                alert(jqXHR.responseText || 'Fail to update!');
+              }
+            });
+          }
+    
+</script>

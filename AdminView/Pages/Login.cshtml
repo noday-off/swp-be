@@ -41,9 +41,31 @@
                     password: password
                 }),
                 success: function(response) {
-                    // Handle the successful login response
-                    localStorage.setItem('token', response.token);
-                    window.location.href = '/'; // Redirect to a success page
+                    //validate role
+                    const jwt = response.token;
+
+                    const parts = jwt.split(".");
+
+                    if (parts.length === 3) {
+                        const payload = atob(parts[1]);
+
+                        // Parse the payload as a JSON object
+                        const payloadData = JSON.parse(payload);
+
+                        // Access the value of the "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" field
+                        const roleValue = payloadData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+                        // Do whatever you want with the roleValue
+                        console.log("Role:", roleValue);
+                        if(roleValue == "Admin"){
+                            localStorage.setItem('token', jwt);
+                            window.location.href = '/'; // Redirect to a success page
+                        }else{
+                            alert("Your account is not allowed to get access to this admin application.");
+                        }
+                    } else {
+                    alert("Invalid JWT format!");
+                    }
                 },
                 error: function(xhr, status, error) {
                     // Handle the login error

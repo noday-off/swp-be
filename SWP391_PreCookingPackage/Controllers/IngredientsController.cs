@@ -32,7 +32,7 @@ namespace SWP391_PreCookingPackage.Controllers
           {
               return NotFound();
           }
-            var result = _mapper.Map<IEnumerable<IngredientModel>>(_context.Ingredients);
+            var result = _mapper.Map<IEnumerable<IngredientModel>>(_context.Ingredients.ToList());
             return Ok(result);
         }
 
